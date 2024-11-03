@@ -9,7 +9,7 @@ int main() {
     do {
         system("cls");
 
-        cout << "/tSISTEMA DE GESTION DE PEDIDOS" << endl;
+        cout << "\tSISTEMA DE GESTION DE PEDIDOS" << endl;
         cout << "Bienvenido!" << endl;
         cout << "1. Mesero" << endl;
         cout << "2. Cocina" << endl;
