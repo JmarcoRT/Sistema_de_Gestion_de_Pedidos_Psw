@@ -9,7 +9,7 @@ using namespace std;
 void menuHistorialVentas() {
     int ops;
     system("cls");
-    cout << "HISTORIAL DE VENTAS" << endl;
+    cout << "\tHISTORIAL DE VENTAS" << endl;
     getch();
 }
 #endif //HISTORIALVENTAS_H

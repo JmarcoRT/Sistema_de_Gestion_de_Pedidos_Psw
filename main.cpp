@@ -8,7 +8,15 @@ int main() {
 
     do {
         system("cls");
-        menu();
+
+        cout << "/tSISTEMA DE GESTION DE PEDIDOS" << endl;
+        cout << "Bienvenido!" << endl;
+        cout << "1. Mesero" << endl;
+        cout << "2. Cocina" << endl;
+        cout << "3. Administrador" << endl;
+        cout << "0. SALIR" << endl;
+        cout << "Seleccione su opcion-->";
+
         cin >> opcion;
 
         switch (opcion) {

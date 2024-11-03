@@ -6,19 +6,10 @@
 #include "gestionMenu.h"
 #include "historialVentas.h"
 #include "informeVentas.h"
+
 using namespace std;
 
-void menu() {
-    cout << "/tSISTEMA DE GESTION DE PEDIDOS" << endl;
-    cout << "Bienvenido!" << endl;
-    cout << "1. Mesero" << endl;
-    cout << "2. Cocina" << endl;
-    cout << "3. Administrador" << endl;
-    cout << "0. SALIR" << endl;
-    cout << "Seleccione su opcion-->";
-}
-
-void menuAdmin() {
+inline void menuAdmin() {
     cout << "Bienvenido al modulo ADMIN" << endl;
     cout << "1. Gestionar menu" << endl;
     cout << "2. Historial de pedidos" << endl;
@@ -27,7 +18,7 @@ void menuAdmin() {
     cout << "Seleccione su opcion-->";
 }
 
-void admin() {
+inline void admin() {
 
     int op;
 

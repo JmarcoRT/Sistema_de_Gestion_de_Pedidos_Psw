@@ -8,7 +8,7 @@ using namespace std;
 
 void menuInformeVentas() {
     system("cls");
-    cout << "INFORME SEMANAL DE VENTAS" << endl;
+    cout << "\tINFORME SEMANAL DE VENTAS" << endl;
     getch();
 }
 #endif //INFORMEVENTAS_H
