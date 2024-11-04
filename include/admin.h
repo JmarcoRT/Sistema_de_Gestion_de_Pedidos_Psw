@@ -6,51 +6,55 @@
 #include "gestionMenu.h"
 #include "historialVentas.h"
 #include "informeVentas.h"
-
+#include "utilidades.h"
 using namespace std;
 
-inline void menuAdmin() {
-    cout << "Bienvenido al modulo ADMIN" << endl;
-    cout << "1. Gestionar menu" << endl;
-    cout << "2. Historial de pedidos" << endl;
-    cout << "3. Informe semanal de ventas" << endl;
-    cout << "0. Salir" << endl << endl;
-    cout << "Seleccione su opcion-->";
-}
 
-inline void admin() {
+void admin() {
+    string usuario;
+    do {
+        system("cls");
+        cuadro(0,0,119,29);
 
-    int op;
+        gotoxy(2,4); cout << "Introduzca el  (0 para salir): ";
+        gotoxy(2,5); cin >> usuario;
+
+        if (usuario == "0") {
+            return; // Salir si se ingresa "0"
+        } else if (usuario != "jefe") {
+            gotoxy(2,6); cout << "El usuario es invalido" << endl;
+            getch();
+        }
+    } while (usuario != "jefe");
+
+    // Usuario autenticado correctamente
+    int opt;
+    bool repite = true;
+    const char *titulo = "Bienvenido al modulo ADMIN";
+    const char *opciones[] = {"Gestionar menu", "Historial de pedidos", "Informe semanal de ventas", "SALIR"};
+    int m = 4;
 
     do {
         system("cls");
-        menuAdmin();
-        cin >> op;
+        cuadro(0,0,119,29);
+        cuadro(8,1,110,3);
 
-        switch (op) {
-            case 1: {
+        opt = menus(titulo, opciones, m);
+        switch (opt) {
+            case 1:
                 menuGestionarMenu();
                 break;
-            }
-            case 2: {
+            case 2:
                 menuHistorialVentas();
                 break;
-            }
-            case 3: {
+            case 3:
                 menuInformeVentas();
                 break;
-            }
-            case 0: {
-                cout << "Hasta luego!" << endl;
-                getch();
+            case 4:
+                repite = false;
                 break;
-            }
-            default: {
-                cout << "Opcion invalida" << endl;
-                getch();
-            }
         }
-    }while(op != 0);
+    } while (repite);
 }
 
 

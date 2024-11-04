@@ -1,49 +1,36 @@
 #include <iostream>
 #include <conio.h>
 #include "include/admin.h"
+#include "include/utilidades.h"
 using namespace std;
 
 int main() {
-    int opcion;
 
+    int opt;
+    bool repite=true;
+    string usuario;
+    const char *titulo="Sistema de Gestion de pedidos";
+    const char *opciones[]={"Mesero","cocina","administrador","SALIR"};
+    int m=4;
+    system("COLOR D6");
+    cuadro(0,0,119,29);
+    cuadro(8,1,110,3);
     do {
-        system("cls");
-
-        cout << "\tSISTEMA DE GESTION DE PEDIDOS" << endl;
-        cout << "Bienvenido!" << endl;
-        cout << "1. Mesero" << endl;
-        cout << "2. Cocina" << endl;
-        cout << "3. Administrador" << endl;
-        cout << "0. SALIR" << endl;
-        cout << "Seleccione su opcion-->";
-
-        cin >> opcion;
-
-        switch (opcion) {
-            case 1: {
-                //mesero();
+        opt=menus(titulo,opciones,m);
+        switch(opt) {
+            case 1://mesero();
                 break;
-            }
-            case 2: {
-                //cocina();
+            case 2://cocina();
                 break;
-            }
-            case 3: {
+            case 3:
                 admin();
-                break;
-            }
-            case 0: {
-                cout << "Saliendo..." << endl;
-                getch();
-                break;
-            }
-            default: {
-                cout<<"Opcion Invalida"<<endl;
-                getch();
-            }
+            break;
+            case 4:
+                repite=false;
+            break;
         }
-    }while(opcion !=0);
+    }while(repite);
+
 
     return 0;
 }
-

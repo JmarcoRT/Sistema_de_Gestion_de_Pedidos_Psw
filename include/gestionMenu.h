@@ -1,16 +1,42 @@
-//Submodulo para Gestionar el Menu
 #ifndef GESTIONMENU_H
 #define GESTIONMENU_H
 
 #include <iostream>
+#include <conio.h>
 #include <limits>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include "utilidades.h"
 using namespace std;
 
+void limpiarPantalla() {
+    system("cls"); // Para Windows
+    // system("clear"); // Descomentar para sistemas Unix o macOS
+}
 
-inline void agregarPlatos(const string& archivo) {
+string tipoPlato() {
+    limpiarPantalla(); // Limpiar pantalla al inicio de la función
+    int tipo;
+    string archivoSeleccionado;
+
+    cout << "\nSelecciona el tipo de plato:\n";
+    cout << "1. Entradas\n";
+    cout << "2. Segundos\n";
+    cout << "3. Bebidas\n\n";
+    cout << "Selecciona una opcion--> ";
+
+    cin >> tipo;
+
+    if (tipo == 1) archivoSeleccionado = "entradas.txt";
+    else if (tipo == 2) archivoSeleccionado = "segundos.txt";
+    else archivoSeleccionado = "bebidas.txt";
+
+    return archivoSeleccionado;
+}
+
+void agregarPlatos(const string& archivo) {
+    limpiarPantalla(); // Limpiar pantalla al inicio de la función
     ofstream file(archivo, ios::app);
     if (!file.is_open()) {
         cout << "Error al abrir el archivo " << archivo << endl;
@@ -47,8 +73,8 @@ inline void agregarPlatos(const string& archivo) {
     cout << "Platos agregados a " << archivo << " correctamente." << endl;
 }
 
-
-inline void leerPlatos(const string& archivo) {
+void leerPlatos(const string& archivo) {
+    limpiarPantalla(); // Limpiar pantalla al inicio de la función
     ifstream file(archivo);
     if (!file.is_open()) {
         cout << "Error al abrir el archivo " << archivo << endl;
@@ -83,8 +109,8 @@ inline void leerPlatos(const string& archivo) {
     file.close();
 }
 
-
-inline void actualizarPlato(const string& archivo) {
+void actualizarPlato(const string& archivo) {
+    limpiarPantalla(); // Limpiar pantalla al inicio de la función
     ifstream file(archivo);
     if (!file.is_open()) {
         cout << "Error al abrir el archivo " << archivo << endl;
@@ -164,64 +190,43 @@ inline void actualizarPlato(const string& archivo) {
         cout << "Plato actualizado correctamente." << endl;
     } else {
         remove("temp.txt");
-        cout << "El plato no se encontro en " << archivo << "." << endl;
+        cout << "El plato no se encontró en " << archivo << "." << endl;
     }
 }
 
-
-inline void menuGestionarMenu() {
-
-    int opcion;
-    string archivoSeleccionado;
-
+void menuGestionarMenu() {
+    int opt;
+    bool repite = true;
+    const char* titulo = "GESTION DEL MENU";
+    const char* opciones[] = { "Agregar Platos", "Ver platos", "Actualizar Plato", "ATRAS" };
+    int m = 4;
+    string tipo;
+    cuadro(0, 0, 119, 29);
+    cuadro(8, 1, 110, 3);
     do {
-        cout << "\n\tMENU\n";
-        cout << "1. Agregar platos\n";
-        cout << "2. Ver platos\n";
-        cout << "3. Actualizar plato\n";
-        cout << "0. Salir\n\n";
-        cout << "Selecciona una opcion--> ";
-
-        if (!(cin >> opcion)) {
-            cout << "Opcion invalida. Intenta de nuevo." << endl;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            continue;
+        opt = menus(titulo, opciones, m);
+        switch (opt) {
+            case 1: {
+                tipo = tipoPlato();
+                agregarPlatos(tipo);
+                break;
+            }
+            case 2: {
+                tipo = tipoPlato();
+                leerPlatos(tipo);
+                break;
+            }
+            case 3: {
+                tipo = tipoPlato();
+                actualizarPlato(tipo);
+                break;
+            }
+            case 4: {
+                repite = false;
+                break;      // Saliendo...
+            }
         }
-
-        if (opcion < 0 || opcion > 3) {
-            cout << "Opcion invalida. Intenta de nuevo." << endl;
-            continue;
-        }
-
-        if (opcion == 0) break;
-
-        int tipo;
-        cout << "\nSelecciona el tipo de plato:\n";
-        cout << "1. Entradas\n";
-        cout << "2. Segundos\n";
-        cout << "3. Bebidas\n\n";
-        cout << "Selecciona una opcion--> ";
-
-        if (!(cin >> tipo) || tipo < 1 || tipo > 3) {
-            cout << "Tipo de plato inválido." << endl;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            continue;
-        }
-
-        if (tipo == 1) archivoSeleccionado = "entradas.txt";
-        else if (tipo == 2) archivoSeleccionado = "segundos.txt";
-        else archivoSeleccionado = "bebidas.txt";
-
-        if (opcion == 1) agregarPlatos(archivoSeleccionado);
-        else if (opcion == 2) leerPlatos(archivoSeleccionado);
-        else if (opcion == 3) actualizarPlato(archivoSeleccionado);
-
-    } while (opcion != 0);
-
-    cout << "Saliendo del programa." << endl;
+    } while (repite);
 }
 
-
-#endif //GESTIONMENU_H
+#endif // GESTIONMENU_H
