@@ -84,7 +84,7 @@ void iniciarCocina() {
                 cout << "Opcion fuera de rango." << endl;
                 break;
         }
-    } while (opcion<1 && opcion>5);
+    } while (opcion < 1 || opcion > 5);
 }
 
 void verPedidos() {
