@@ -275,7 +275,7 @@ inline void actualizarOrden() {
     int opc;
     string categoriasbuscar;
 
-    Orden nuevosPlatos = o; // Crear un objeto temporal para los nuevos platos
+    Orden nuevosPlatos; // Crear un objeto temporal para los nuevos platos
 
     do {
         mostrarCategorias(categorias);
@@ -314,6 +314,11 @@ inline void actualizarOrden() {
     }
 
     FILE *temp = fopen("temp.dat", "w+b");
+    if (temp == nullptr) {
+        cout << "Error al crear el archivo temporal para guardar la actualización." << endl;
+        fclose(archivo);
+        return;
+    }
 
     fseek(archivo, 0, SEEK_SET);
 
