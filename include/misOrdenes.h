@@ -32,7 +32,7 @@ inline void finalizarOrden() {
    |__|  |_|_|_|__,|_|_|___|__,|_|    |___|_| |___|___|_|_|
 
     )" << endl;
-    cout << "Mesas con órdenes pendientes:\n";
+    cout << "Mesas con órdenes atendidas:\n";
 
     FILE* archivo = fopen("Ordenes.dat", "rb+");
     if (archivo == nullptr) {
@@ -41,10 +41,10 @@ inline void finalizarOrden() {
         return;
     }
 
-    //Se mostrarán las mesas con órdenes pendientes, verificando primero el estado de la orden
+    //Se mostrarán las mesas con órdenes atendidas, verificando primero el estado de la orden
     Orden o;
     size_t numPlatos;
-    bool hayOrdenesPendientes = false;
+    bool hayOrdenesAtendidas = false;
     while (fread(&o.numeroMesa, sizeof(int), 1, archivo) &&
            fread(&o.hora, sizeof(Fecha), 1, archivo) &&
            fread(o.estado, sizeof(o.estado), 1, archivo) &&
@@ -55,13 +55,13 @@ inline void finalizarOrden() {
             fread(&p, sizeof(Plato), 1, archivo);
             o.platos.push_back(p);
         }
-        if (strcmp(o.estado, "pendiente") == 0) {
+        if (strcmp(o.estado, "atendido") == 0) {
             cout << "Mesa " << o.numeroMesa << endl;
-            hayOrdenesPendientes = true;
+            hayOrdenesAtendidas = true;
         }
-    }
-    if (!hayOrdenesPendientes) {
-        cout << "No hay órdenes pendientes.\n";
+           }
+    if (!hayOrdenesAtendidas) {
+        cout << "No hay órdenes atendidas.\n";
         fclose(archivo);
         system("pause");
         return;
@@ -101,10 +101,16 @@ inline void finalizarOrden() {
                 system("pause");
                 return;
             }
+            if (strcmp(o.estado, "pendiente") == 0) {
+                cout << "La orden de la mesa " << numeroMesa << " no puede ser finalizada, ya que sigue pendiente.\n";
+                fclose(archivo);
+                system("pause");
+                return;
+            }
             posicion = ftell(archivo) - (sizeof(o.numeroMesa) + sizeof(o.hora) + sizeof(o.estado) + sizeof(size_t) + numPlatos * sizeof(Plato));
             break;
         }
-    }
+           }
 
     if (!ordenEncontrada) {
         cout << "No se encontró una orden para la mesa " << numeroMesa << ".\n";
@@ -130,23 +136,54 @@ inline void finalizarOrden() {
     cout << "Generando boleta...\n\n";
 
     double total = 0;
+
+    cout << "                 BOLETA\n\n";
+    cout << "        RAZON SOCIAL: TANTA KENNEDY\n";
+    cout << "              RUT: 76.064.319-K\n";
+    cout << "           GIRO: RESTAURANTES\n";
+    cout << "   LOCAL: AV. KENNEDY 5413 LOC 371\n";
+    cout << "        LAS CONDES - SANTIAGO\n\n";
+
     for (const auto& plato : o.platos) {
-        cout << plato.cantidad << "x " << plato.nombre << "   $" << plato.precio * plato.cantidad << "\n";
+        cout << std::setw(2) << plato.cantidad << "X ";
+        cout << std::left << std::setw(15) << plato.nombre;
+        cout << "$" << std::right << std::setw(10) << plato.precio * plato.cantidad << "\n";
         total += plato.precio * plato.cantidad;
     }
+
     cout << "----------------------------------------\n";
-    cout << "TOTAL: $" << total << "\n";
+    cout << "TOTAL                             $" << total << "\n\n";
+
+    cout << "Tienda:           TANTA PARQUE ARAUCO\n";
+    cout << "Fecha:            " << formato_hora(o.hora) << "\n";
+    cout << "Atendido por:     Liliana Jimenez\n";
+    cout << "Mesa:             M" << o.numeroMesa << "\n";
+    cout << "----------------------------------------\n";
 
     //Se guarda la boleta como un archivo txt
     string nombreArchivo = "boleta_mesa_" + to_string(o.numeroMesa) + ".txt";
     ofstream boletaArchivo(nombreArchivo);
 
     if (boletaArchivo.is_open()) {
-        boletaArchivo << "Boleta de Venta - Mesa M" << o.numeroMesa << "\n";
+        boletaArchivo << "                 BOLETA\n\n";
+        boletaArchivo << "        RAZON SOCIAL: TANTA KENNEDY\n";
+        boletaArchivo << "              RUT: 76.064.319-K\n";
+        boletaArchivo << "           GIRO: RESTAURANTES\n";
+        boletaArchivo << "   LOCAL: AV. KENNEDY 5413 LOC 371\n";
+        boletaArchivo << "        LAS CONDES - SANTIAGO\n\n";
         for (const auto& plato : o.platos) {
-            boletaArchivo << plato.cantidad << "x " << plato.nombre << "   $" << plato.precio * plato.cantidad << "\n";
+            boletaArchivo << setw(2) << plato.cantidad << "X ";
+            boletaArchivo << left << setw(15) << plato.nombre;
+            boletaArchivo << "$" << right << setw(10) << plato.precio * plato.cantidad << "\n";
         }
-        boletaArchivo << "TOTAL: $" << total << "\n";
+        boletaArchivo << "----------------------------------------\n";
+        boletaArchivo << "TOTAL                             $" << total << "\n\n";
+
+        boletaArchivo << "Tienda:           TANTA PARQUE ARAUCO\n";
+        boletaArchivo << "Fecha:            " << formato_hora(o.hora) << "\n";
+        boletaArchivo << "Atendido por:     Liliana Jimenez\n";
+        boletaArchivo << "Mesa:             M" << o.numeroMesa << "\n";
+        boletaArchivo << "----------------------------------------\n";
         boletaArchivo.close();
         cout << "La boleta se ha descargado y guardado como " << nombreArchivo << ".\n";
     } else {
