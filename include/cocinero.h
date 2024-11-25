@@ -20,7 +20,6 @@ void atenderPedidos();
 void aceptarPedido(int);
 void cancelarPlato(int);
 void completarPedido(int);
-void verCambiosOrden(int);
 
 // Implementación de funciones
 void cargarPedidosDesdeArchivo() {
@@ -56,8 +55,8 @@ void iniciarCocina() {
     int opt;
     bool repite = true;
     const char *titulo = "MENU COCINA";
-    const char *opciones[] = {"Ver pedidos", "Atender pedidos", "Ver cambios en una orden", "SALIR"};
-    int m = 4;
+    const char *opciones[] = {"Ver pedidos", "Atender pedidos", "SALIR"};
+    int m = 3; // Reducido a 3 opciones
     do {
         system("cls");
         cuadro(0, 0, 119, 29);
@@ -72,13 +71,6 @@ void iniciarCocina() {
                 atenderPedidos();
                 break;
             case 3:
-                system("cls");
-                int numeroOrden;
-                cout << "Ingrese el numero de orden: ";
-                cin >> numeroOrden;
-                verCambiosOrden(numeroOrden);
-                break;
-            case 4:
                 repite = false;
                 break;
         }
@@ -198,34 +190,6 @@ void atenderPedidos() {
     }
 
     cout << "\nPresione cualquier tecla para continuar...";
-    cin.ignore();
-    cin.get();
-}
-
-void verCambiosOrden(int numeroOrden) {
-    system("CLS");
-    bool encontrado = false;
-
-    for (const auto& pedido : pedidos) {
-        if (pedido.numeroMesa == numeroOrden) {
-            encontrado = true;
-            cout << "===== Detalles de la Orden #" << pedido.numeroMesa << " =====" << endl;
-            cout << "Estado: " << pedido.estado << endl;
-
-            for (const auto& plato : pedido.platos) {
-                cout << "- " << plato.nombre << " ($" << plato.precio << "), Cantidad: " << plato.cantidad
-                     << ", Comentario: " << plato.comentario << endl;
-            }
-
-            break;
-        }
-    }
-
-    if (!encontrado) {
-        cout << "Orden no encontrada." << endl;
-    }
-
-    cout << "\nPresione cualquier tecla para volver al menu principal...";
     cin.ignore();
     cin.get();
 }

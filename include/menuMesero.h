@@ -217,118 +217,144 @@ inline void actualizarOrden() {
     system("cls");
     vector<string> categorias;
     cargarCategorias(categorias);
-    cout<<"> ACTUALIZAR ORDEN"<<endl<<endl;
-    bool ordenEncontrada=false;
-    //Apertura de archivos y definicion de variables
+    cout << "> ACTUALIZAR ORDEN" << endl << endl;
+
+    bool ordenEncontrada = false;
     FILE *archivo = fopen("Ordenes.dat", "r+b");
-    FILE *temp = fopen("temp.dat", "w+b");
-    int  numeroMesa;
+    if (archivo == nullptr) {
+        cout << "Error al abrir el archivo de órdenes." << endl;
+        return;
+    }
+
+    int numeroMesa;
     Orden o;
     size_t numPlatos;
-    //Solicitud del numero de mesa
-    do{
+
+    // Solicitar número de mesa
+    do {
         cin.clear();
         fflush(stdin);
-        cout<<"Numero de mesa que cancelo la orden :  ";cin>>numeroMesa;
+        cout << "Numero de mesa a actualizar: ";
+        cin >> numeroMesa;
 
-        if(numeroMesa<0 || cin.fail() ){
-            cout<<"\n\n"; cout<<"mesa no existente"<<"\n\n";
+        if (numeroMesa < 0 || cin.fail()) {
+            cout << "\nMesa no existente\n\n";
         }
+    } while (numeroMesa < 0 || cin.fail());
 
-    }while(numeroMesa<0  || cin.fail() );
-
-    // Copia de ordenes del archivo original al temporal, excepto la orden a cancelar
+    // Leer todas las órdenes y buscar la que coincida
     while (fread(&o.numeroMesa, sizeof(int), 1, archivo) &&
            fread(&o.hora, sizeof(Fecha), 1, archivo) &&
            fread(o.estado, sizeof(o.estado), 1, archivo) &&
            fread(&numPlatos, sizeof(size_t), 1, archivo)) {
-           o.platos.clear();
-           for (size_t i = 0; i < numPlatos; ++i) {
+
+        o.platos.clear();
+        for (size_t i = 0; i < numPlatos; ++i) {
             Plato p;
             fread(&p, sizeof(Plato), 1, archivo);
             o.platos.push_back(p);
         }
-        if (o.numeroMesa != numeroMesa) {
-            fwrite(&o.numeroMesa, sizeof(o.numeroMesa), 1, temp);
-            fwrite(&o.hora, sizeof(o.hora), 1, temp);
-            fwrite(&o.estado, sizeof(o.estado), 1, temp);
 
-            numPlatos = o.platos.size();
-            fwrite(&numPlatos, sizeof(numPlatos), 1, temp);
+        if (o.numeroMesa == numeroMesa) {
+            ordenEncontrada = true;
+            break; // Encontró la orden, salir del bucle
+        }
+    }
 
-            // Guardar cada plato individualmente
-            for (const auto& plato : o.platos) {
-                fwrite(&plato, sizeof(Plato), 1, temp);
+    fclose(archivo);
+
+    if (!ordenEncontrada) {
+        cout << "\nNo se encontró ninguna orden para la mesa " << numeroMesa << ".\n";
+        system("pause");
+        return;
+    }
+
+    // Agregar o actualizar platos en la orden
+    cout << "\n> Agregar nuevos platos o actualizar existentes:\n";
+    bool flag = false;
+    int opc;
+    string categoriasbuscar;
+
+    do {
+        mostrarCategorias(categorias);
+
+        fflush(stdin);
+        cout << "Ingrese la categoría: ";
+        getline(cin, categoriasbuscar);
+        fflush(stdin);
+
+        mostrarPlatosPorCategoria(categoriasbuscar, o, flag);
+
+        cout << "Desea agregar otro plato a la orden? (1: Sí | 0: No): ";
+        cin >> opc;
+    } while (opc == 1);
+
+    // Combinar platos: actualizar cantidades si el plato ya existe
+    archivo = fopen("Ordenes.dat", "r+b");
+    if (archivo == nullptr) {
+        cout << "Error al abrir el archivo para guardar la actualización." << endl;
+        return;
+    }
+
+    fseek(archivo, 0, SEEK_SET);
+    FILE *temp = fopen("temp.dat", "w+b");
+
+    while (fread(&o.numeroMesa, sizeof(int), 1, archivo) &&
+           fread(&o.hora, sizeof(Fecha), 1, archivo) &&
+           fread(o.estado, sizeof(o.estado), 1, archivo) &&
+           fread(&numPlatos, sizeof(size_t), 1, archivo)) {
+
+        Orden tempOrden;
+        tempOrden.numeroMesa = o.numeroMesa;
+        tempOrden.hora = o.hora;
+        strcpy(tempOrden.estado, o.estado);
+
+        tempOrden.platos.clear();
+        for (size_t i = 0; i < numPlatos; ++i) {
+            Plato p;
+            fread(&p, sizeof(Plato), 1, archivo);
+            tempOrden.platos.push_back(p);
+        }
+
+        if (tempOrden.numeroMesa == numeroMesa) {
+            // Combinar platos existentes y nuevos
+            for (const auto &nuevoPlato : o.platos) {
+                bool encontrado = false;
+                for (auto &platoExistente : tempOrden.platos) {
+                    if (strcmp(platoExistente.nombre, nuevoPlato.nombre) == 0) {
+                        platoExistente.cantidad += nuevoPlato.cantidad;
+                        encontrado = true;
+                        break;
+                    }
+                }
+                if (!encontrado) {
+                    tempOrden.platos.push_back(nuevoPlato);
+                }
             }
-        } else {
-            ordenEncontrada = true; // Indicar que la orden a cancelar fue encontrada
+        }
+
+        // Guardar la orden actualizada en el archivo temporal
+        fwrite(&tempOrden.numeroMesa, sizeof(tempOrden.numeroMesa), 1, temp);
+        fwrite(&tempOrden.hora, sizeof(tempOrden.hora), 1, temp);
+        fwrite(tempOrden.estado, sizeof(tempOrden.estado), 1, temp);
+
+        size_t platosSize = tempOrden.platos.size();
+        fwrite(&platosSize, sizeof(platosSize), 1, temp);
+
+        for (const auto &plato : tempOrden.platos) {
+            fwrite(&plato, sizeof(Plato), 1, temp);
         }
     }
 
     fclose(archivo);
     fclose(temp);
 
-    if (ordenEncontrada) {
-        // Eliminar el archivo original
-        remove("Ordenes.dat");
-        rename("temp.dat", "Ordenes.dat");
-        //----------------------------------------------------------FUNCION AGREGAR ORDEN---------------------------------------
-        vector<string> categorias;
-        cargarCategorias(categorias);
-        int opc;
-        bool flag =false;
-        FILE *archivo = fopen("Ordenes.dat", "a+b");
-        Orden o;
-        system("cls");
+    // Reemplazar archivo original por el temporal
+    remove("Ordenes.dat");
+    rename("temp.dat", "Ordenes.dat");
 
-        fflush(stdin);
-        //ya no pide numero de mesa
-        o.numeroMesa= numeroMesa;
-        fflush(stdin);
-        o.hora = definir_fecha(0,0,0,0);
-        fflush(stdin);
-        strcpy(o.estado, "pendiente");
-        //funcion para ver las categorias
-        mostrarCategorias(categorias);
-
-        cout<<endl;
-        string categoriasbuscar;
-        do {
-            fflush(stdin);
-            cout<<"Ingrese la categoria :";getline(cin,categoriasbuscar);
-            fflush(stdin);
-            mostrarPlatosPorCategoria(categoriasbuscar, o,flag);
-            if(flag) {
-                fclose(archivo);
-                return;
-            }
-            cout << "Desea agregar otro plato a la orden? (1: Si | 0: No): ";
-            cin >> opc;
-        }while(opc == 1);
-        //guardar cada cosa independiente
-        fwrite(&o.numeroMesa, sizeof(o.numeroMesa), 1, archivo);
-        fwrite(&o.hora, sizeof(o.hora), 1, archivo);
-        fwrite(&o.estado, sizeof(o.estado), 1, archivo);
-
-
-        // Guardar la cantidad de platos en el vector
-        size_t numPlatos = o.platos.size();
-        fwrite(&numPlatos, sizeof(numPlatos), 1, archivo);
-
-        // Guardar cada plato individualmente
-        for (const auto& plato : o.platos) {
-            fwrite(&plato, sizeof(Plato), 1, archivo);
-        }
-
-        fclose(archivo);
-        //----------------------------------------------------fin de funcion agregar orden-----------------------------------------
-        cout << "\nOrden de la mesa " << numeroMesa << " actualizada con exito.\n";
-    } else {
-        cout << "\nNo se encontro ninguna orden para la mesa " << numeroMesa << ".\n";
-    }
-
+    cout << "\nOrden de la mesa " << numeroMesa << " actualizada con éxito.\n";
     system("pause");
-    getch();
 }
 inline void menuOrdenes() {
     int opt;
