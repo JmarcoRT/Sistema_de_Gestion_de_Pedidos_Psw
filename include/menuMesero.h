@@ -275,6 +275,8 @@ inline void actualizarOrden() {
     int opc;
     string categoriasbuscar;
 
+    Orden nuevosPlatos = o; // Crear un objeto temporal para los nuevos platos
+
     do {
         mostrarCategorias(categorias);
 
@@ -283,21 +285,37 @@ inline void actualizarOrden() {
         getline(cin, categoriasbuscar);
         fflush(stdin);
 
-        mostrarPlatosPorCategoria(categoriasbuscar, o, flag);
+        mostrarPlatosPorCategoria(categoriasbuscar, nuevosPlatos, flag);
 
         cout << "Desea agregar otro plato a la orden? (1: Sí | 0: No): ";
         cin >> opc;
     } while (opc == 1);
 
     // Combinar platos: actualizar cantidades si el plato ya existe
+    for (const auto &nuevoPlato : nuevosPlatos.platos) {
+        bool encontrado = false;
+        for (auto &platoExistente : o.platos) {
+            if (strcmp(platoExistente.nombre, nuevoPlato.nombre) == 0) {
+                platoExistente.cantidad += nuevoPlato.cantidad; // Actualizar cantidad
+                encontrado = true;
+                break;
+            }
+        }
+        if (!encontrado) {
+            o.platos.push_back(nuevoPlato); // Agregar el nuevo plato si no existía
+        }
+    }
+
+    // Guardar la orden actualizada en el archivo
     archivo = fopen("Ordenes.dat", "r+b");
     if (archivo == nullptr) {
         cout << "Error al abrir el archivo para guardar la actualización." << endl;
         return;
     }
 
-    fseek(archivo, 0, SEEK_SET);
     FILE *temp = fopen("temp.dat", "w+b");
+
+    fseek(archivo, 0, SEEK_SET);
 
     while (fread(&o.numeroMesa, sizeof(int), 1, archivo) &&
            fread(&o.hora, sizeof(Fecha), 1, archivo) &&
@@ -317,20 +335,7 @@ inline void actualizarOrden() {
         }
 
         if (tempOrden.numeroMesa == numeroMesa) {
-            // Combinar platos existentes y nuevos
-            for (const auto &nuevoPlato : o.platos) {
-                bool encontrado = false;
-                for (auto &platoExistente : tempOrden.platos) {
-                    if (strcmp(platoExistente.nombre, nuevoPlato.nombre) == 0) {
-                        platoExistente.cantidad += nuevoPlato.cantidad;
-                        encontrado = true;
-                        break;
-                    }
-                }
-                if (!encontrado) {
-                    tempOrden.platos.push_back(nuevoPlato);
-                }
-            }
+            tempOrden = o; // Reemplazar la orden con la actualizada
         }
 
         // Guardar la orden actualizada en el archivo temporal
