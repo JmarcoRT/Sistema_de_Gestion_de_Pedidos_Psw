@@ -96,7 +96,9 @@ void verPedidos() {
     Orden o;
     size_t numPlatos;
 
-    cout << "===== Pedidos Actuales =====" << endl;
+    cout << "===== Pedidos Pendientes =====" << endl;
+
+    bool hayPendientes = false; // Variable para verificar si hay pedidos pendientes
 
     while (fread(&o.numeroMesa, sizeof(int), 1, archivo) &&
            fread(&o.hora, sizeof(Fecha), 1, archivo) &&
@@ -110,20 +112,28 @@ void verPedidos() {
             o.platos.push_back(p);
         }
 
-        // Mostrar los detalles de la orden
-        cout << "Numero de mesa: " << o.numeroMesa << endl;
-        cout << "Fecha: " << formato_hora(o.hora) << endl;
-        cout << "Estado: " << o.estado << endl;
+        // Mostrar solo las órdenes pendientes
+        if (strcmp(o.estado, "pendiente") == 0) {
+            hayPendientes = true;
+            cout << "Numero de mesa: " << o.numeroMesa << endl;
+            cout << "Fecha: " << formato_hora(o.hora) << endl;
+            cout << "Estado: " << o.estado << endl;
 
-        cout << "Platos en la orden:" << endl;
-        for (const auto& plato : o.platos) {
-            cout << "- " << plato.nombre << " ($" << plato.precio << "), Cantidad: " << plato.cantidad
-                 << ", Comentario: " << plato.comentario << endl;
+            cout << "Platos en la orden:" << endl;
+            for (const auto& plato : o.platos) {
+                cout << "- " << plato.nombre << " ($" << plato.precio << "), Cantidad: " << plato.cantidad
+                     << ", Comentario: " << plato.comentario << endl;
+            }
+            cout << "\n";
         }
-        cout << "\n";
     }
 
     fclose(archivo);
+
+    if (!hayPendientes) {
+        cout << "No hay pedidos pendientes en este momento." << endl;
+    }
+
     cout << "\nPresione cualquier tecla para volver al menu principal...";
     cin.ignore();
     cin.get();
@@ -182,6 +192,9 @@ void atenderPedidos() {
 
     if (!encontrado) {
         cout << "Orden no encontrada." << endl;
+    } else {
+        // Recargar pedidos en memoria para reflejar cambios
+        cargarPedidosDesdeArchivo();
     }
 
     cout << "\nPresione cualquier tecla para continuar...";
